@@ -355,21 +355,24 @@ const handleLocalPlaylist = (id: number) => {
 
 // 获取在线歌单
 const handleOnlinePlaylist = async (id: number, getList: boolean, refresh: boolean) => {
+  console.log(id, getList, refresh);
+
   // 获取歌单详情
   const detail = await playlistDetail(id);
   playlistDetailData.value = formatCoverList(detail.playlist)[0];
+  const count = playlistDetailData.value?.count || 0;
   // 不需要获取列表或无歌曲
-  if (!getList || playlistDetailData.value.count === 0) {
+  if (!getList || count === 0) {
     loading.value = false;
     return;
   }
   // 如果已登录且歌曲数量少于 800，直接加载所有歌曲
-  if (isLogin() === 1 && (playlistDetailData.value?.count as number) < 800) {
+  if (isLogin() === 1 && count === detail.privileges?.length && count < 800) {
     const ids = detail.privileges.map((song: any) => song.id as number);
     const result = await songDetail(ids);
     playlistData.value = formatSongsList(result.songs);
   } else {
-    await getPlaylistAllSongs(id, playlistDetailData.value.count || 0, refresh);
+    await getPlaylistAllSongs(id, count, refresh);
   }
   loading.value = false;
 };
@@ -424,7 +427,6 @@ const loadingMsgShow = (show: boolean = true, count?: number) => {
       closable: true,
     });
   } else {
-    loading.value = false;
     loadingMsg.value?.destroy();
     loadingMsg.value = null;
   }
