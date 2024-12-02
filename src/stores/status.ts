@@ -74,7 +74,7 @@ export const useStatusStore = defineStore({
     // 音乐频谱数据
     spectrumsData: [],
     // 当前播放索引
-    playIndex: 0,
+    playIndex: -1,
     // 歌词播放索引
     lyricIndex: -1,
     // 默认倍速
