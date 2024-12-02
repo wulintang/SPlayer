@@ -66,16 +66,7 @@
           <!-- 封面 -->
           <PlayerCover />
           <!-- 数据 -->
-          <PlayerData
-            v-if="settingStore.playerType === 'cover' || !musicStore.isHasLrc || isShowComment"
-            :center="
-              statusStore.pureLyricMode ||
-              musicStore.playSong.type === 'radio' ||
-              !musicStore.isHasLrc ||
-              isShowComment
-            "
-            :theme="mainColor"
-          />
+          <PlayerData :center="playerDataCenter" :theme="mainColor" />
         </div>
         <Transition name="fade" mode="out-in">
           <!-- 评论 -->
@@ -83,14 +74,14 @@
           <!-- 歌词 -->
           <div v-else-if="musicStore.isHasLrc" class="content-right">
             <!-- 数据 -->
-            <PlayerData
+            <!-- <PlayerData
               v-if="
                 (statusStore.pureLyricMode && musicStore.isHasLrc) ||
                 (settingStore.playerType === 'record' && musicStore.isHasLrc)
               "
               :center="statusStore.pureLyricMode"
               :theme="mainColor"
-            />
+            /> -->
             <!-- 歌词 -->
             <MainAMLyric v-if="settingStore.useAMLyrics" />
             <MainLyric v-else />
@@ -120,6 +111,11 @@ const musicStore = useMusicStore();
 const statusStore = useStatusStore();
 const settingStore = useSettingStore();
 
+// 是否显示评论
+const isShowComment = computed<boolean>(
+  () => !musicStore.playSong.path && statusStore.showPlayerComment,
+);
+
 // 主内容 key
 const playerContentKey = computed(() => {
   return `
@@ -129,8 +125,15 @@ const playerContentKey = computed(() => {
   ${isShowComment.value}`;
 });
 
-// 是否显示评论
-const isShowComment = computed(() => !musicStore.playSong.path && statusStore.showPlayerComment);
+// 数据是否居中
+const playerDataCenter = computed<boolean>(
+  () =>
+    !musicStore.isHasLrc ||
+    statusStore.pureLyricMode ||
+    settingStore.playerType === "record" ||
+    musicStore.playSong.type === "radio" ||
+    isShowComment.value,
+);
 
 // 当前实时歌词
 const instantLyrics = computed(() => {
