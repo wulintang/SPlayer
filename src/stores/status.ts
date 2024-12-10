@@ -29,6 +29,7 @@ interface StatusState {
   lyricIndex: number;
   currentTime: number;
   duration: number;
+  chorus: number;
   progress: number;
   currentTimeOffset: number;
   playUblock: boolean;
@@ -65,6 +66,8 @@ export const useStatusStore = defineStore({
     currentTime: 0,
     duration: 0,
     progress: 0,
+    // 副歌时间
+    chorus: 0,
     // 进度偏移
     currentTimeOffset: 0,
     // 封面主题

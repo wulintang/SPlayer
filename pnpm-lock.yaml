@@ -84,6 +84,9 @@ importers:
       font-list:
         specifier: ^1.5.1
         version: 1.5.1
+      get-port:
+        specifier: ^7.1.0
+        version: 7.1.0
       github-markdown-css:
         specifier: ^5.8.1
         version: 5.8.1
@@ -2336,6 +2339,10 @@ packages:
   get-intrinsic@1.2.4:
     resolution: {integrity: sha512-5uYhsJH8VJBTv7oslg4BznJYhDoRI6waYCxMmCdnTrcCrHA/fCFKoTFz2JKKE0HdDFUF7/oQuhzumXJK7paBRQ==}
     engines: {node: '>= 0.4'}
+
+  get-port@7.1.0:
+    resolution: {integrity: sha512-QB9NKEeDg3xxVwCCwJQ9+xycaz6pBB6iQ76wiWMl1927n0Kir6alPiP+yuiICLLU4jpMe08dXfpebuQppFA2zw==}
+    engines: {node: '>=16'}
 
   get-stream@4.1.0:
     resolution: {integrity: sha512-GMat4EJ5161kIy2HevLlr4luNjBgvmj413KaQA7jt4V8B4RDsfpHk7WQ9GVqfYyyx8OS/L66Kox+rJRNklLK7w==}
@@ -6477,6 +6484,8 @@ snapshots:
       has-proto: 1.1.0
       has-symbols: 1.0.3
       hasown: 2.0.2
+
+  get-port@7.1.0: {}
 
   get-stream@4.1.0:
     dependencies:

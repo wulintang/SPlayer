@@ -15,6 +15,11 @@
       :max="100"
       :tooltip="false"
       :keyboard="false"
+      :marks="
+        statusStore.chorus && statusStore.progress <= statusStore.chorus
+          ? { [statusStore.chorus]: '' }
+          : undefined
+      "
       class="player-slider"
       @dragstart="player.pause(false)"
       @dragend="sliderDragend"
@@ -380,6 +385,7 @@ const changeVolume = (e: WheelEvent) => {
     height: 16px;
     top: -8px;
     left: 0;
+    margin: 0;
     --n-rail-height: 3px;
     --n-handle-size: 14px;
   }

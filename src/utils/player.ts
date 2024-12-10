@@ -4,7 +4,7 @@ import { Howl, Howler } from "howler";
 import { cloneDeep } from "lodash-es";
 import { useMusicStore, useStatusStore, useDataStore, useSettingStore } from "@/stores";
 import { parsedLyricsData, resetSongLyric, parseLocalLyric } from "./lyric";
-import { songUrl, unlockSongUrl, songLyric } from "@/api/song";
+import { songUrl, unlockSongUrl, songLyric, songChorus } from "@/api/song";
 import { getCoverColorData } from "@/utils/color";
 import { calculateProgress } from "./time";
 import { isElectron, isDev } from "./helper";
@@ -52,6 +52,7 @@ class Player {
       currentTime: 0,
       duration: 0,
       progress: 0,
+      chorus: 0,
       currentTimeOffset: 0,
       lyricIndex: -1,
       playStatus: false,
@@ -113,12 +114,7 @@ class Player {
       // 歌词跨界处理
       const lyricIndex = index === -1 ? lyrics.length - 1 : index - 1;
       // 更新状态
-      statusStore.$patch({
-        currentTime,
-        duration,
-        progress,
-        lyricIndex,
-      });
+      statusStore.$patch({ currentTime, duration, progress, lyricIndex });
       // 客户端事件
       if (isElectron) {
         // 歌词变化
@@ -217,9 +213,11 @@ class Player {
     if (!settingStore.showSpectrums) this.toggleOutputDevice();
     // 自动播放
     if (autoPlay) this.play();
-    // 获取歌词数据 - 非电台和本地
-    if (type !== "radio" && !path) this.getLyricData(id);
-    else resetSongLyric();
+    // 获取歌曲附加信息 - 非电台和本地
+    if (type !== "radio" && !path) {
+      this.getLyricData(id);
+      this.getChorus(id);
+    } else resetSongLyric();
     // 定时获取状态
     if (!this.playerInterval) this.handlePlayStatus();
     // 新增播放历史
@@ -401,6 +399,22 @@ class Player {
     }
     const lyricRes = await songLyric(id);
     parsedLyricsData(lyricRes);
+  }
+  /**
+   * 获取副歌时间
+   * @param id 歌曲id
+   */
+  private async getChorus(id: number) {
+    const statusStore = useStatusStore();
+    const result = await songChorus(id);
+    if (result?.code !== 200 || result?.chorus?.length === 0) {
+      statusStore.chorus = 0;
+      return;
+    }
+    // 计算并保存
+    const chorus = result?.chorus?.[0]?.startTime;
+    const time = ((chorus / 1000 / statusStore.duration) * 100).toFixed(2);
+    statusStore.chorus = Number(time);
   }
   /**
    * 播放错误
@@ -590,8 +604,8 @@ class Player {
     const statusStore = useStatusStore();
 
     // 播放器未加载完成
-    if (this.player.state() !== "loaded"){
-      return
+    if (this.player.state() !== "loaded") {
+      return;
     }
 
     // 淡出
@@ -880,7 +894,7 @@ class Player {
     const songIndex = await dataStore.setNextPlaySong(song, statusStore.playIndex);
     // 播放歌曲
     if (songIndex < 0) return;
-    if (play) this.togglePlayIndex(songIndex,true);
+    if (play) this.togglePlayIndex(songIndex, true);
     else window.$message.success("已添加至下一首播放");
   }
   /**
@@ -888,7 +902,7 @@ class Player {
    * @param index 播放索引
    * @param play 是否立即播放
    */
-  async togglePlayIndex(index: number,play:boolean = false) {
+  async togglePlayIndex(index: number, play: boolean = false) {
     const dataStore = useDataStore();
     const statusStore = useStatusStore();
     // 获取数据
