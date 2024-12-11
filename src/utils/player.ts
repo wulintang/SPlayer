@@ -760,19 +760,25 @@ class Player {
    * 设置播放音量
    * @param actions 音量
    */
-  setVolume(actions: number | WheelEvent) {
+  setVolume(actions: number | "up" | "down" | WheelEvent) {
     const statusStore = useStatusStore();
+    const increment = 0.05;
     // 直接设置
     if (typeof actions === "number") {
       actions = Math.max(0, Math.min(actions, 1));
-    } else {
-      const increment = 0.05;
-      const deltaY = actions.deltaY;
-      const volume = deltaY > 0 ? "down" : "up";
+    }
+    // 分类调节
+    else if (actions === "up" || actions === "down") {
       statusStore.playVolume = Math.max(
         0,
-        Math.min(statusStore.playVolume + (volume === "up" ? increment : -increment), 1),
+        Math.min(statusStore.playVolume + (actions === "up" ? increment : -increment), 1),
       );
+    }
+    // 鼠标滚轮
+    else {
+      const deltaY = actions.deltaY;
+      const volumeChange = deltaY > 0 ? -increment : increment;
+      statusStore.playVolume = Math.max(0, Math.min(statusStore.playVolume + volumeChange, 1));
     }
     // 调整音量
     this.player.volume(statusStore.playVolume);
