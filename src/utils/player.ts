@@ -758,15 +758,17 @@ class Player {
   }
   /**
    * 设置播放音量
-   * @param volume 音量
+   * @param actions 音量
    */
-  setVolume(volume: number | "up" | "down") {
+  setVolume(actions: number | WheelEvent) {
     const statusStore = useStatusStore();
     // 直接设置
-    if (typeof volume === "number") {
-      volume = Math.max(0, Math.min(volume, 1));
+    if (typeof actions === "number") {
+      actions = Math.max(0, Math.min(actions, 1));
     } else {
       const increment = 0.05;
+      const deltaY = actions.deltaY;
+      const volume = deltaY > 0 ? "down" : "up";
       statusStore.playVolume = Math.max(
         0,
         Math.min(statusStore.playVolume + (volume === "up" ? increment : -increment), 1),

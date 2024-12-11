@@ -40,8 +40,7 @@ interface StatusState {
   personalFmMode: boolean;
 }
 
-export const useStatusStore = defineStore({
-  id: "status",
+export const useStatusStore = defineStore("status", {
   state: (): StatusState => ({
     // 菜单折叠状态
     menuCollapsed: false,
@@ -101,13 +100,46 @@ export const useStatusStore = defineStore({
     // 播放器评论
     showPlayerComment: false,
   }),
-  getters: {},
+  getters: {
+    // 播放音量图标
+    playVolumeIcon(state) {
+      const volume = state.playVolume;
+      return volume === 0
+        ? "VolumeOff"
+        : volume < 0.4
+          ? "VolumeMute"
+          : volume < 0.7
+            ? "VolumeDown"
+            : "VolumeUp";
+    },
+    // 播放模式图标
+    playModeIcon(state) {
+      const mode = state.playSongMode;
+      return state.playHeartbeatMode
+        ? "HeartBit"
+        : mode === "repeat"
+          ? "Repeat"
+          : mode === "repeat-once"
+            ? "RepeatSong"
+            : "Shuffle";
+    },
+    // 音量百分比
+    playVolumePercent(state) {
+      return Math.round(state.playVolume * 100);
+    },
+    // 播放器主色
+    mainColor(state) {
+      const mainColor = state.songCoverTheme?.main;
+      if (!mainColor) return "239, 239, 239";
+      return `${mainColor.r}, ${mainColor.g}, ${mainColor.b}`;
+    },
+  },
   actions: {},
   // 持久化
   persist: {
     key: "status-store",
     storage: localStorage,
-    paths: [
+    pick: [
       "menuCollapsed",
       "currentTime",
       "duration",

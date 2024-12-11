@@ -44,6 +44,11 @@ const login = async () => {
     window.$message.warning("请输入 Cookie");
     return;
   }
+  // 是否为有效 Cookie
+  if (!cookie.value.includes("MUSIC_U") || cookie.value.endsWith(";")) {
+    window.$message.warning("请输入有效的 Cookie");
+    return;
+  }
   // 写入 Cookie
   try {
     window.$message.success("登录成功");
@@ -66,8 +71,6 @@ const login = async () => {
 onMounted(() => {
   if (isElectron) {
     window.electron.ipcRenderer.on("send-cookies", (_, value) => {
-      console.log(typeof value);
-
       if (!value) return;
       cookie.value = value;
       login();
