@@ -6,7 +6,7 @@
       </template>
       可在官方的
       <n-a href="https://music.163.com/" target="_blank">网页端</n-a>
-      和客户端的控制台中获取，只需要 Cookie 中的 <code>MUSIC_U</code> 字段即可，例如：
+      或点击下方的自动获取，只需要 Cookie 中的 <code>MUSIC_U</code> 字段即可，例如：
       <code>MUSIC_U=00C7...;</code><br />请注意：必须以 <code>;</code> 结束
     </n-alert>
     <n-input
@@ -15,12 +15,16 @@
       type="textarea"
       placeholder="请输入 Cookie"
     />
-    <n-button type="primary" @click="login">登录</n-button>
+    <n-flex class="menu">
+      <n-button v-if="isElectron" type="primary" @click="openWeb">自动获取</n-button>
+      <n-button type="primary" @click="login">登录</n-button>
+    </n-flex>
   </div>
 </template>
 
 <script setup lang="ts">
 import type { LoginType } from "@/types/main";
+import { isElectron } from "@/utils/helper";
 
 const emit = defineEmits<{
   close: [];
@@ -28,6 +32,11 @@ const emit = defineEmits<{
 }>();
 
 const cookie = ref<string>();
+
+// 开启窗口
+const openWeb = () => {
+  window.electron.ipcRenderer.send("open-login-web");
+};
 
 // Cookie 登录
 const login = async () => {
@@ -53,6 +62,18 @@ const login = async () => {
     console.error("Cookie 登录出错：", error);
   }
 };
+
+onMounted(() => {
+  if (isElectron) {
+    window.electron.ipcRenderer.on("send-cookies", (_, value) => {
+      console.log(typeof value);
+
+      if (!value) return;
+      cookie.value = value;
+      login();
+    });
+  }
+});
 </script>
 
 <style lang="scss" scoped>
@@ -72,6 +93,14 @@ const login = async () => {
     border-radius: 8px;
     margin: 4px 0;
     font-family: auto;
+  }
+  .menu {
+    margin-top: 20px;
+    .n-button {
+      width: auto;
+      flex: 1;
+      margin: 0;
+    }
   }
 }
 </style>
